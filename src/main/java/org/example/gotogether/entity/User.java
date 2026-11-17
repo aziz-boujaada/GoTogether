@@ -29,18 +29,19 @@ public abstract class User {
     private Long id;
 
     @Column(nullable = false)
-    private String nom;
-
-    @Column(nullable = false)
-    private String prenom;
+    private String name;
 
     @Column(nullable = false, unique = true)
     private String email;
 
-    private String telephone;
+    @Column(nullable = false, unique = true)
+    private String phone;
 
     @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false)
+    private boolean active;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
