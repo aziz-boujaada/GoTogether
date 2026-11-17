@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
         public User toNewUser(CreateUserRequest request) {
             User user = switch (request.role()) {
+                case ADMIN -> new User() ;
                 case DRIVER -> new Driver();
                 case PASSENGER -> new Passenger();
             };
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
             user.setEmail(request.email());
             user.setPassword(request.password());
             user.setRole(request.role());
+            user.setPhone(request.phone());
 
             if (user instanceof Driver driver && request.permisNumber() != null) {
                 driver.setPermisNumber(request.permisNumber());
