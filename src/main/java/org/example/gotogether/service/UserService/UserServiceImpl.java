@@ -4,7 +4,11 @@ import org.example.gotogether.dto.request.CreateUserRequest;
 import org.example.gotogether.dto.response.UserResponseDto;
 import org.example.gotogether.entity.User;
 import org.example.gotogether.enums.UserRole;
+import org.example.gotogether.exception.InvalidValueException;
+import org.example.gotogether.exception.ResourceAlreadyExistException;
+import org.example.gotogether.exception.ResourceNotFoundException;
 import org.example.gotogether.mapper.UserMapper;
+import org.example.gotogether.repository.DriverRepository;
 import org.example.gotogether.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -14,14 +18,17 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final DriverRepository driverRepository;
     private final UserMapper userMapper;
 
     public UserServiceImpl(
             UserRepository userRepository,
-            UserMapper userMapper
+            UserMapper userMapper,
+            DriverRepository driverRepository
     ) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.driverRepository = driverRepository;
     }
 
     @Override
@@ -29,7 +36,7 @@ public class UserServiceImpl implements UserService {
 
         validateRole(request);
         if (userRepository.existsByEmail(request.email())) {
-            throw new IllegalArgumentException("this email already exist ");
+            throw new ResourceAlreadyExistException("this email already exist ");
         }
         return userMapper.toResponse(userRepository.save(userMapper.toNewUser(request)));
     }
@@ -38,7 +45,7 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto updateUser(CreateUserRequest request , Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() ->
-                    new IllegalArgumentException("User not found")
+                    new ResourceNotFoundException("User not found")
                 );
         validateRole(request);
         userMapper.updateExistingUser(user , request);
@@ -72,13 +79,19 @@ public class UserServiceImpl implements UserService {
                         request.permisNumber() == null ||
                         request.permisNumber().isBlank())
         ) {
-           throw new IllegalArgumentException("driver must have a permis number");
+           throw new InvalidValueException("driver must have a permis number");
+        }
+
+        if(driverRepository.existsByPermisNumber(request.permisNumber())){
+            throw new ResourceAlreadyExistException(
+                    "This permis number already exists"
+            );
         }
     }
 
     private User getUser(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
 }
