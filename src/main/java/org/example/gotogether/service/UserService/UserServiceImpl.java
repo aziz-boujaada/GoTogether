@@ -13,7 +13,7 @@ import org.example.gotogether.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -62,13 +62,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findUserById(Long id) {
+    public UserResponseDto findUserById(Long id) {
         return getUser(id);
     }
 
     @Override
     public void delete(Long id) {
-       User user = getUser(id);
+       User user = userRepository.findById(id)
+               .orElseThrow(() -> new ResourceNotFoundException("User not found"));
        userRepository.delete(user);
     }
 
@@ -89,8 +90,9 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private User getUser(Long id) {
+    private UserResponseDto getUser(Long id) {
         return userRepository.findById(id)
+                .map(userMapper::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
