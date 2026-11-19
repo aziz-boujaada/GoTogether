@@ -13,13 +13,13 @@ public interface TripMapper {
     @Mapping(target = "driver", ignore = true)
     @Mapping(target = "vehicle", ignore = true)
     @Mapping(target = "status", ignore = true)
-    @Mapping(target = "stopPoints", ignore = true)
     @Mapping(target = "reservations", ignore = true)
+    @Mapping(target = "stopPoints", ignore = true)
     Trip toEntity(CreateTripRequestDto dto);
 
     @Mapping(target = "driverId", source = "driver.id")
     @Mapping(target = "vehicleId", source = "vehicle.id")
-    @Mapping(target = "stopPoints", ignore = true)
+    @Mapping(target = "stopPoints", source = "stopPoints")
     TripResponseDto toResponseDto(Trip trip);
 
     List<TripResponseDto> toResponseDtoList(List<Trip> trips);
@@ -28,8 +28,8 @@ public interface TripMapper {
     @Mapping(target = "driver", ignore = true)
     @Mapping(target = "vehicle", ignore = true)
     @Mapping(target = "status", ignore = true)
-    @Mapping(target = "stopPoints", ignore = true)
     @Mapping(target = "reservations", ignore = true)
+    @Mapping(target = "stopPoints", ignore = true)
     void updateEntity(
             CreateTripRequestDto dto,
             @MappingTarget Trip trip
