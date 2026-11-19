@@ -17,6 +17,7 @@ import org.example.gotogether.repository.TripRepository;
 import org.example.gotogether.repository.VehicleRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 @Service
@@ -57,6 +58,7 @@ public class TripServiceImpl implements TripService{
                 .map(stopPointMapper::toEntity)
                 .toList();
 
+        validPrices(stopPoints);
         initializeStopPoints(stopPoints , trip);
         trip.getStopPoints().addAll(stopPoints);
 
@@ -144,5 +146,26 @@ public class TripServiceImpl implements TripService{
        if(exists){
            throw new ResourceAlreadyExistException("A trip with this vehicle already exists within 24 hours");
        }
+    }
+
+    private void validPrices(List<StopPoint> stopPoints){
+        for(int i = 1 ; i < stopPoints.size() ; i++){
+
+            BigDecimal firstPointPrice =
+                    stopPoints.get(0).getPriceFromDeparture();
+
+            BigDecimal currentPointPrice =
+                    stopPoints.get(i).getPriceFromDeparture();
+
+            BigDecimal previousPointPrice =
+                    stopPoints.get(i - 1).getPriceFromDeparture();
+
+            if(firstPointPrice.compareTo(BigDecimal.ZERO) != 0){
+                throw new InvalidValueException("First stop point price must equal to 0");
+            }
+            if(currentPointPrice.compareTo(previousPointPrice) < 0){
+                throw new InvalidValueException("Stop point prices must be in acs order");
+            }
+        }
     }
 }
