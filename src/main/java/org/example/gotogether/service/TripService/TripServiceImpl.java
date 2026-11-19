@@ -137,14 +137,13 @@ public class TripServiceImpl implements TripService{
         }
     }
     private void validDuplicatePublication(CreateTripRequestDto requestDto){
-       LocalDateTime departure = requestDto.departureDate();
-       boolean exists = tripRepository.existsByVehicleIdAndDepartureDateBetween(
+
+       boolean hasActiveTrip = tripRepository.existsByVehicleIdAndStatusNot(
                requestDto.vehicleId(),
-               requestDto.departureDate().minusHours(24),
-               requestDto.departureDate().plusHours(24)
+               TripStatus.COMPLET
        );
-       if(exists){
-           throw new ResourceAlreadyExistException("A trip with this vehicle already exists within 24 hours");
+       if(hasActiveTrip){
+           throw new ResourceAlreadyExistException("This vehicle already has an active trip ");
        }
     }
 
