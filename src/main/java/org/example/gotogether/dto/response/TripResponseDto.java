@@ -3,6 +3,7 @@ package org.example.gotogether.dto.response;
 import org.example.gotogether.enums.TripStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record TripResponseDto(
         Long id,
@@ -15,8 +16,8 @@ public record TripResponseDto(
 
         Long driverId,
 
-        Long vehicleId
+        Long vehicleId,
 
-        // List<StopPointResponseDto> stopPoints
+        List<StopPointsResponse> stopPoints
 ) {
 }

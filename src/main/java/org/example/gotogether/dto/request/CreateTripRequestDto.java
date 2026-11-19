@@ -1,8 +1,10 @@
 package org.example.gotogether.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record CreateTripRequestDto(
         @NotNull(message = "Departure date is required")
@@ -15,6 +17,10 @@ public record CreateTripRequestDto(
 
         @NotNull(message = "Vehicle ID is required")
         @Positive
-        Long vehicleId
+        Long vehicleId,
+
+        @NotNull
+        @Size(min = 2 , message = "trip must contain at least 2 points to start")
+        List<@NotNull @Valid CreateStopPointsRequest> pointsRequests
 ) {
 }
