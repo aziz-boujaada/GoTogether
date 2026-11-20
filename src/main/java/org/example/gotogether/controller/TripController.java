@@ -3,7 +3,9 @@ package org.example.gotogether.controller;
 
 import jakarta.validation.Valid;
 import org.example.gotogether.dto.request.CreateTripRequestDto;
+import org.example.gotogether.dto.request.SearchTripRequest;
 import org.example.gotogether.dto.response.TripResponseDto;
+import org.example.gotogether.service.TripService.SearchTripService;
 import org.example.gotogether.service.TripService.TripService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +18,13 @@ import java.util.List;
 public class TripController {
 
     private final TripService tripService;
-
-    public TripController(TripService tripService) {
+    private final SearchTripService searchTripService;
+    public TripController(
+            TripService tripService ,
+            SearchTripService searchTripService
+            ) {
         this.tripService = tripService;
+        this.searchTripService = searchTripService;
     }
 
     @PostMapping
@@ -59,6 +65,16 @@ public class TripController {
     ) {
         tripService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // search
+    @GetMapping("/search")
+    public ResponseEntity<List<TripResponseDto>> searchTrips(
+            @ModelAttribute SearchTripRequest request
+    ) {
+        return ResponseEntity.ok(
+                searchTripService.searchTrips(request)
+        );
     }
 }
 
