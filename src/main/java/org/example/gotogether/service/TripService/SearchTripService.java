@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.gotogether.dto.request.SearchTripRequest;
 import org.example.gotogether.dto.response.TripResponseDto;
 import org.example.gotogether.enums.TripStatus;
+import org.example.gotogether.exception.RequiredArgumentException;
 import org.example.gotogether.mapper.TripMapper;
 import org.example.gotogether.repository.TripRepository;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,9 @@ public class SearchTripService {
                : null ;
 
 
-
+       if(searchRequest.departureCity() == null || searchRequest.arrivalCity() == null){
+           throw new RequiredArgumentException("The departure and arrival City are required to search");
+       }
        return tripRepository.searchForTrips(
                searchRequest.departureCity(),
                searchRequest.arrivalCity(),
