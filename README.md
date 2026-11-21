@@ -50,6 +50,9 @@ Contrairement à un système de réservation classique, une place peut être ré
 
 ### Publication d'un trajet
 
+
+
+
 - Le véhicule doit exister et le conducteur est récupéré depuis celui-ci.
 - Le nombre de places proposées doit être positif et respecter la capacité du véhicule.
 - Un trajet doit comporter au minimum deux points d'arrêt.
