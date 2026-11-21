@@ -4,6 +4,7 @@ package org.example.gotogether.adviceController;
 import jakarta.servlet.http.HttpServletRequest;
 import org.example.gotogether.dto.response.ApiResponseDto;
 import org.example.gotogether.exception.InvalidValueException;
+import org.example.gotogether.exception.RequiredArgumentException;
 import org.example.gotogether.exception.ResourceAlreadyExistException;
 import org.example.gotogether.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -55,5 +56,15 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
         return buildResponse(request , HttpStatus.CONFLICT , exception.getMessage());
+    }
+
+
+    /// handle the resource already exist exception
+    @ExceptionHandler(RequiredArgumentException.class)
+    public ResponseEntity<ApiResponseDto> handleRequiredArgument(
+            RequiredArgumentException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(request , HttpStatus.BAD_REQUEST , exception.getMessage());
     }
 }
