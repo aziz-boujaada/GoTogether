@@ -1,11 +1,16 @@
 package org.example.gotogether.repository;
 
+import org.example.gotogether.dto.response.ReservationResponseDto;
 import org.example.gotogether.entity.Reservation;
 import org.example.gotogether.enums.ReservationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
+@Repository
 public interface ReservationRepository extends JpaRepository<Reservation , Long> {
     @Query("""
      SELECT COALESCE(SUM(r.numberOfSeats), 0)
@@ -20,4 +25,6 @@ public interface ReservationRepository extends JpaRepository<Reservation , Long>
            @Param("segmentOrder") Integer segmentOrder,
            @Param("status") ReservationStatus status
     );
+
+    List<Reservation> findAllByPassengerId(Long passengerId);
 }

@@ -12,10 +12,13 @@ import org.example.gotogether.mapper.ReservationMapperImpl;
 import org.example.gotogether.repository.ReservationRepository;
 import org.example.gotogether.repository.TripRepository;
 import org.example.gotogether.repository.UserRepository;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
+@Service
 public class ReservationServiceImpl implements ReservationService{
 
     private final UserRepository userRepository;
@@ -38,7 +41,7 @@ public class ReservationServiceImpl implements ReservationService{
     @Override
     public ReservationResponseDto createReservation(CreateReservationRequestDto request) {
 
-         getPassenger(request.passengerId());
+         Passenger passenger = getPassenger(request.passengerId());
          Trip trip = getTrip(request.tripId());
 
          if(trip.getStatus() != TripStatus.PUBLIE){
@@ -48,23 +51,63 @@ public class ReservationServiceImpl implements ReservationService{
          StopPoint departureCity = getDepartureCity(request.departurePointId(), trip);
          StopPoint arrivalCity = getArrivalCity(request.arrivalPointId(), trip);
          validateAvailableSeats(trip,departureCity ,arrivalCity , request.numberOfSeats());
-         
+
         if(!isPointBelongsToTrip(trip ,departureCity , arrivalCity )){
             throw new InvalidValueException("Departure and arrival points must belong to the selected trip");
         }
-        calculTotal(request.numberOfSeats(), departureCity ,arrivalCity);
+        BigDecimal totalPrice = calculTotal(request.numberOfSeats(), departureCity ,arrivalCity);
 
-        return null;
+        Reservation reservation = reservationMapper.toEntity(request);
+        reservation.setPassenger(passenger);
+        reservation.setTrip(trip);
+        reservation.setDeparturePoint(departureCity);
+        reservation.setArrivalPoint(arrivalCity);
+        reservation.setReservationDate(LocalDateTime.now());
+        reservation.setTotalPrice(totalPrice);
+        reservation.setStatus(ReservationStatus.CONFIRMEE);
+
+        return reservationMapper.toResponseDto(reservationRepository.save(reservation));
     }
 
     @Override
-    public void cancelReservation(Reservation reservation) {
+    public void cancelReservation(Long reservationId) {
 
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
+
+        if (reservation.getStatus() == ReservationStatus.ANNULEE) {
+            throw new InvalidValueException(
+                    "This reservation is already cancelled"
+            );
+        }
+
+
+        if (reservation.getStatus() != ReservationStatus.CONFIRMEE) {
+            throw new InvalidValueException(
+                    "Only confirmed reservations can be cancelled"
+            );
+
+        }
+
+            if (reservation.getDeparturePoint().getPassageTime()
+                    .isBefore(LocalDateTime.now().plusHours(24))) {
+
+                throw new InvalidValueException(
+                        "You must cancel at least 24 hours before departure"
+                );
+            }
+
+        reservation.setStatus(ReservationStatus.ANNULEE);
+
+        reservationRepository.save(reservation);
     }
 
     @Override
     public List<ReservationResponseDto> allReservations(Long passengerId) {
-        return List.of();
+        return reservationRepository.findAllByPassengerId(passengerId)
+                .stream()
+                .map(reservationMapper::toResponseDto)
+                .toList();
     }
 
     @Override
@@ -74,14 +117,14 @@ public class ReservationServiceImpl implements ReservationService{
                 .multiply(BigDecimal.valueOf(numberOfSeats));
     }
 
-    private User getPassenger(Long passengerId){
+    private Passenger getPassenger(Long passengerId){
         User user = userRepository.findById(passengerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Passenger not found "));
 
-        if(!(user instanceof Passenger)){
+        if(!(user instanceof Passenger passenger)){
             throw  new InvalidValueException("only passengers can make reservation");
         }
-        return  user;
+        return passenger;
     }
 
     private Trip getTrip(Long tripId){
